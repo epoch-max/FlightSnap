@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlightSnap · 特价机票发现平台</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070E1C;--bg2:#0A1628;--bg3:#0E1F38;--bg4:#122440;
+  --card:#0D1B30;--card-h:#102035;
+  --b1:#1A2E4A;--b2:#22395C;--b3:#2C4870;
+  --cyan:#12D8FA;--cyanA:rgba(18,216,250,.13);--cyanB:rgba(18,216,250,.06);
+  --orange:#FF7A3D;--orangeA:rgba(255,122,61,.13);
+  --green:#00E5A0;--greenA:rgba(0,229,160,.1);
+  --red:#FF4E6A;--redA:rgba(255,78,106,.1);
+  --amber:#FFB830;--amberA:rgba(255,184,48,.1);
+  --purple:#A78BFA;--purpleA:rgba(167,139,250,.1);
+  --t1:#DCE9FF;--t2:#7A9DC0;--t3:#3D5A7A;--t4:#243A54;
+  --r:8px;--r2:12px;--r3:18px;--r4:24px;
+  --shadow:0 4px 24px rgba(0,0,0,.5);
+  --glow-c:0 0 24px rgba(18,216,250,.15);
+  --glow-o:0 0 24px rgba(255,122,61,.15);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden;line-height:1.5}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+input,select,button{font-family:'Plus Jakarta Sans',sans-serif}
+
+/* ─── NAV ───────────────────────── */
+nav{position:sticky;top:0;z-index:200;height:58px;display:flex;align-items:center;padding:0 20px;gap:16px;background:rgba(7,14,28,.88);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--b1)}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--cyan),#0891b2);display:grid;place-items:center;font-size:15px;box-shadow:0 0 16px rgba(18,216,250,.35)}
+.logo-text{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.4px;color:var(--t1)}
+.logo-text em{color:var(--cyan);font-style:normal}
+.nav-center{flex:1;display:flex;justify-content:center;gap:2px}
+.nav-tab{padding:6px 18px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--t3);cursor:pointer;border:none;background:none;transition:all .18s;position:relative;letter-spacing:.1px}
+.nav-tab:hover{color:var(--t2);background:var(--bg3)}
+.nav-tab.active{color:var(--cyan);background:var(--cyanA)}
+.nav-tab.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--cyan);border-radius:2px 2px 0 0}
+.nav-right{display:flex;align-items:center;gap:8px}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:var(--bg3);border:1px solid var(--b1);display:grid;place-items:center;cursor:pointer;font-size:15px;transition:all .15s;position:relative;flex-shrink:0}
+.icon-btn:hover{border-color:var(--b2);background:var(--bg4)}
+.badge-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg);transition:all .2s}
+.badge-count{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;background:var(--red);border-radius:8px;border:1.5px solid var(--bg);font-size:10px;font-weight:700;display:grid;place-items:center;color:#fff}
+
+/* ─── LAYOUT ────────────────────── */
+.page{display:none;padding:24px 20px 60px;max-width:1080px;margin:0 auto;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ─── HERO ───────────────────────── */
+.hero{position:relative;margin-bottom:28px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 120% at 50% -20%,rgba(18,216,250,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 80% at 85% 60%,rgba(255,122,61,.06) 0%,transparent 50%);pointer-events:none}
+.hero-content{position:relative;padding:36px 28px 28px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:var(--cyanA);border:1px solid rgba(18,216,250,.25);font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:16px;letter-spacing:.3px}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:36px;font-weight:800;line-height:1.15;letter-spacing:-1.2px;margin-bottom:10px}
+.hero h1 .hl{color:var(--cyan)}
+.hero h1 .hl2{color:var(--orange)}
+.hero-sub{color:var(--t2);font-size:14.5px;margin-bottom:24px;max-width:480px;line-height:1.6}
+.hero-stats{display:flex;gap:24px;flex-wrap:wrap}
+.hero-stat{display:flex;flex-direction:column}
+.hero-stat strong{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--t1);letter-spacing:-.5px}
+.hero-stat span{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+
+/* ─── SEARCH BOX ─────────────────── */
+.search-box{background:var(--card);border:1px solid var(--b1);border-radius:var(--r3);padding:18px;margin-bottom:24px;box-shadow:var(--shadow)}
+.sb-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.sb-field{flex:1;min-width:130px}
+.sb-label{font-size:10.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px;display:block}
+.sb-input{width:100%;background:var(--bg3);border:1px solid var(--b1);border-radius:9px;padding:11px 14px;color:var(--t1);font-size:13.5px;outline:none;transition:all .2s}
+.sb-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(18,216,250,.08)}
+.sb-input option{background:var(--bg2)}
+.sb-sep{color:var(--t3);font-size:20px;padding-top:22px;flex-shrink:0}
+.btn-search{background:linear-gradient(135deg,var(--cyan) 0%,#0891b2 100%);color:#07111f;font-weight:800;font-size:14px;padding:12px 28px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:all .2s;box-shadow:0 4px 16px rgba(18,216,250,.3);margin-top:22px;letter-spacing:.2px}
+.btn-search:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(18,216,250,.4)}
+.btn-search:active{transform:none}
+
+/* ─── SECTION HEADER ─────────────── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sh h2{font-size:16px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:7px}
+.sh-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:12px}
+.sh a{font-size:12.5px;color:var(--cyan);cursor:pointer;opacity:.8;transition:opacity .15s}
+.sh a:hover{opacity:1}
+
+/* ─── TAG STRIP ──────────────────── */
+.tag-strip{display:flex;gap:7px;margin-bottom:22px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.tag-strip::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;border:1px solid var(--b1);color:var(--t3);background:var(--card);transition:all .18s;user-select:none}
+.chip:hover{color:var(--t2);border-color:var(--b2)}
+.chip.on{background:var(--cyanA);border-color:rgba(18,216,250,.4);color:var(--cyan)}
+.chip.fire{background:var(--orangeA);border-color:rgba(255,122,61,.35);color:var(--orange)}
+
+/* ─── FLIGHT CARD ────────────────── */
+.grid-flights{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:30px}
+.fc{background:var(--card);border:1px solid var(--b1);border-radius:var(--r3);padding:0;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.fc:hover{border-color:var(--b2);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.fc-accent{height:2px;background:linear-gradient(90deg,var(--cyan),var(--orange),transparent);opacity:0;transition:opacity .22s}
+.fc:hover .fc-accent{opacity:1}
+.fc-body{padding:18px;flex:1;display:flex;flex-direction:column;gap:13px}
+.fc-top{display:flex;justify-content:space-between;align-items:flex-start}
+.fc-route{display:flex;align-items:center;gap:10px}
+.fc-city{text-align:center}
+.fc-code{font-family:'Space Mono',monospace;font-size:21px;font-weight:700;color:var(--t1);letter-spacing:-.5px}
+.fc-name{font-size:10.5px;color:var(--t3);font-weight:600;margin-top:2px}
+.fc-mid{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.fc-line{display:flex;align-items:center;gap:4px;width:100%}
+.fc-dash{flex:1;height:1px;background:var(--b2)}
+.fc-plane{font-size:13px;color:var(--t3)}
+.fc-dur{font-size:10.5px;color:var(--t3);font-weight:600}
+.fc-badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-disc{background:var(--redA);color:var(--red);border:1px solid rgba(255,78,106,.25)}
+.b-low{background:var(--greenA);color:var(--green);border:1px solid rgba(0,229,160,.25)}
+.b-hot{background:var(--orangeA);color:var(--orange);border:1px solid rgba(255,122,61,.25)}
+.b-lim{background:var(--amberA);color:var(--amber);border:1px solid rgba(255,184,48,.25)}
+.fc-price-row{display:flex;align-items:flex-end;gap:10px}
+.fc-price{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;color:var(--orange);letter-spacing:-1px}
+.fc-price-sub{display:flex;flex-direction:column;gap:2px;margin-bottom:2px}
+.fc-orig{font-size:12px;color:var(--t3);text-decoration:line-through}
+.fc-trend{font-size:11px;font-weight:700}
+.trend-d{color:var(--green)}.trend-u{color:var(--red)}.trend-f{color:var(--t3)}
+.fc-meta{display:flex;gap:12px;flex-wrap:wrap}
+.fc-meta-item{font-size:12px;color:var(--t2);display:flex;align-items:center;gap:4px}
+.fc-perks{display:flex;gap:5px;flex-wrap:wrap}
+.perk{padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--t3);border:1px solid var(--b1)}
+.fc-platforms{display:flex;gap:5px;flex-wrap:wrap}
+.plat{padding:4px 10px;border-radius:6px;font-size:11.5px;font-weight:600;background:var(--bg3);border:1px solid var(--b1);color:var(--t2);transition:all .15s}
+.plat.best{background:var(--cyanA);border-color:rgba(18,216,250,.35);color:var(--cyan)}
+.fc-footer{border-top:1px solid var(--b1);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.fc-score{display:flex;align-items:center;gap:7px}
+.fc-score-num{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--cyan)}
+.score-pips{display:flex;gap:2px}
+.pip{width:9px;height:4px;border-radius:2px;background:var(--b2)}
+.pip.on{background:var(--cyan)}
+.fc-acts{display:flex;gap:6px}
+.btn-xs{padding:6px 13px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:.1px}
+.btn-p{background:var(--cyan);color:#07111f}.btn-p:hover{background:#34E0FF}
+.btn-g{background:var(--bg3);color:var(--t2);border:1px solid var(--b1)}.btn-g:hover{border-color:var(--b2);color:var(--t1)}
+
+/* ─── CALENDAR ───────────────────── */
+.cal-wrap{background:var(--card);border:1px solid var(--b1);border-radius:var(--r3);padding:20px;margin-bottom:28px;box-shadow:var(--shadow)}
+.cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-arr{width:30px;height:30px;border-radius:7px;background:var(--bg3);border:1px solid var(--b1);color:var(--t2);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:all .15s;user-select:none}
+.cal-arr:hover{border-color:var(--b2);color:var(--t1)}
+.cal-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.cal-legend{display:flex;gap:14px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3);font-weight:600}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--t4);padding:6px 0;text-transform:uppercase;letter-spacing:.5px}
+.cal-day{border-radius:9px;padding:9px 4px;text-align:center;cursor:pointer;border:1px solid transparent;transition:all .18s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:60px}
+.cal-day:hover:not(.past){border-color:var(--b2);background:var(--bg3)}
+.cal-day.sel{border-color:var(--cyan)!important;background:var(--cyanA)!important}
+.cal-day.today{border-color:var(--b2)}
+.cal-day.past{opacity:.3;cursor:default}
+.cal-day.empty{opacity:0;pointer-events:none}
+.d-num{font-size:13px;font-weight:700}
+.d-price{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700}
+.d-lowest{background:rgba(0,229,160,.12);border-color:rgba(0,229,160,.15)!important}.d-lowest .d-price{color:var(--green)}
+.d-low{background:rgba(0,229,160,.05)}.d-low .d-price{color:#4dba8a}
+.d-norm .d-price{color:var(--t3)}
+.d-high{background:rgba(255,184,48,.06)}.d-high .d-price{color:var(--amber)}
+.d-peak{background:rgba(255,78,106,.08)}.d-peak .d-price{color:var(--red)}
+
+/* ─── INSPO ──────────────────────── */
+.inspo-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;margin-bottom:30px;scrollbar-width:none}
+.inspo-row::-webkit-scrollbar{display:none}
+.inspo-card{min-width:142px;flex-shrink:0;background:var(--card);border:1px solid var(--b1);border-radius:var(--r2);padding:16px 14px;cursor:pointer;transition:all .2s}
+.inspo-card:hover{border-color:var(--b2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.inspo-flag{font-size:26px;margin-bottom:8px;line-height:1}
+.inspo-name{font-size:13px;font-weight:700;margin-bottom:4px;color:var(--t1)}
+.inspo-p{font-family:'Space Mono',monospace;font-size:12px;color:var(--orange);font-weight:700}
+
+/* ─── COUNTDOWN ──────────────────── */
+.deal-banner{background:linear-gradient(135deg,rgba(255,122,61,.12),rgba(255,184,48,.08));border:1px solid rgba(255,122,61,.25);border-radius:var(--r2);padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.db-left{display:flex;align-items:center;gap:10px}
+.db-icon{font-size:20px}
+.db-text strong{display:block;font-size:14px;font-weight:700;color:var(--orange)}
+.db-text span{font-size:12px;color:var(--t2)}
+.countdown{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.cd-box{background:var(--bg3);border:1px solid var(--b1);border-radius:7px;padding:6px 10px;text-align:center;min-width:44px}
+.cd-num{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--orange);line-height:1}
+.cd-label{font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.cd-colon{color:var(--t3);font-size:18px;font-weight:700;font-family:'Space Mono',monospace}
+
+/* ─── SEARCH PAGE ────────────────── */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.f-chip{padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;border:1px solid var(--b1);color:var(--t3);background:var(--card);transition:all .18s;user-select:none}
+.f-chip:hover{color:var(--t2);border-color:var(--b2)}
+.f-chip.on{background:var(--cyanA);border-color:rgba(18,216,250,.4);color:var(--cyan)}
+.sort-group{display:flex;gap:5px;margin-left:auto}
+.sort-btn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--b1);background:var(--card);color:var(--t3);transition:all .15s;letter-spacing:.1px}
+.sort-btn.on{background:var(--bg3);border-color:var(--b2);color:var(--t1)}
+.results-bar{background:var(--bg3);border:1px solid var(--b1);border-radius:9px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.r-hl{color:var(--cyan);font-weight:700}
+.r-hl-o{color:var(--orange);font-weight:700;font-family:'Space Mono',monospace}
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state h3{font-size:18px;font-weight:700;color:var(--t2);margin-bottom:8px}
+.empty-state p{color:var(--t3);font-size:14px}
+
+/* ─── RADAR PAGE ─────────────────── */
+.radar-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(18,216,250,.07),rgba(167,139,250,.05));border:1px solid var(--b1);border-radius:var(--r3);padding:24px 24px;margin-bottom:26px}
+.radar-hero::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(18,216,250,.08),transparent 70%);pointer-events:none}
+.rh-left h2{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:5px}
+.rh-left p{color:var(--t2);font-size:13.5px}
+.btn-add{background:linear-gradient(135deg,var(--cyan),#0891b2);color:#07111f;font-weight:800;font-size:13px;padding:10px 22px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(18,216,250,.25);letter-spacing:.2px}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(18,216,250,.35)}
+.rh-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.rh-stats{display:flex;gap:18px;margin-top:16px}
+.rh-stat{text-align:center;padding:12px 16px;background:rgba(0,0,0,.2);border-radius:10px;border:1px solid var(--b1)}
+.rh-stat strong{display:block;font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
+.rh-stat span{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.alarm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px;margin-bottom:26px}
+.ac{background:var(--card);border:1px solid var(--b1);border-radius:var(--r3);padding:18px;position:relative;transition:all .2s}
+.ac:hover{border-color:var(--b2)}
+.ac.triggered{border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.03)}
+.ac.expired{opacity:.45}
+.ac-status{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:12px}
+.s-mon{background:var(--cyanA);color:var(--cyan)}
+.s-trig{background:var(--greenA);color:var(--green)}
+.s-exp{background:var(--bg3);color:var(--t3)}
+.pulse-dot{width:6px;height:6px;border-radius:50%}
+.pulse-c{background:var(--cyan);animation:pulse 1.6s infinite}
+.pulse-g{background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ac-route{font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:10px}
+.ac-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.ac-row{display:flex;justify-content:space-between;font-size:12.5px}
+.ac-label{color:var(--t3)}
+.ac-val{color:var(--t2);font-weight:600}
+.ac-prices{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg3);border-radius:9px;padding:12px;margin-bottom:12px}
+.ac-price-item{text-align:center}
+.ac-pi-label{font-size:10.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.ac-pi-val{font-family:'Space Mono',monospace;font-size:18px;font-weight:700}
+.trigger-alert{background:var(--greenA);border:1px solid rgba(0,229,160,.25);border-radius:8px;padding:10px 13px;font-size:12.5px;font-weight:700;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.ac-del{position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:6px;background:transparent;border:none;color:var(--t4);cursor:pointer;font-size:13px;display:grid;place-items:center;transition:all .15s}
+.ac-del:hover{background:var(--redA);color:var(--red)}
+.progress-wrap{margin-top:8px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:5px;font-weight:600}
+.progress-bar{height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .5s ease}
+
+/* ─── ADD ALARM FORM ─────────────── */
+.alarm-form{background:var(--card);border:1px solid var(--b1);border-radius:var(--r3);padding:24px;display:none}
+.alarm-form.open{display:block;animation:fadeIn .25s ease}
+.af-title{font-size:16px;font-weight:800;margin-bottom:20px;letter-spacing:-.2px}
+.af-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.af-field{display:flex;flex-direction:column;gap:7px}
+.af-field.full{grid-column:1/-1}
+.af-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.af-input{background:var(--bg3);border:1px solid var(--b1);border-radius:9px;padding:11px 14px;color:var(--t1);font-size:13.5px;outline:none;transition:all .2s}
+.af-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(18,216,250,.08)}
+.af-hint{background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:10px 13px;font-size:12.5px;color:var(--t2);margin-top:2px}
+.af-hint strong{color:var(--green)}
+.mode-tabs{display:flex;gap:7px;flex-wrap:wrap}
+.mode-tab{padding:7px 14px;border-radius:8px;border:1px solid var(--b1);background:var(--bg3);font-size:12.5px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .18s;user-select:none}
+.mode-tab:hover{border-color:var(--b2);color:var(--t2)}
+.mode-tab.on{border-color:rgba(18,216,250,.4);background:var(--cyanA);color:var(--cyan)}
+.check-row{display:flex;gap:9px;flex-wrap:wrap}
+.check-pill{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;border:1px solid var(--b1);background:var(--bg3);cursor:pointer;font-size:13px;font-weight:600;color:var(--t2);transition:all .18s;user-select:none}
+.check-pill:hover{border-color:var(--b2)}
+.check-pill.on{border-color:rgba(18,216,250,.4);background:var(--cyanA);color:var(--cyan)}
+.af-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;padding-top:18px;border-top:1px solid var(--b1)}
+.btn-cancel{padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:none;border:1px solid var(--b1);color:var(--t2);transition:all .15s}
+.btn-cancel:hover{border-color:var(--b2);color:var(--t1)}
+
+/* ─── MODAL ───────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(7,14,28,.88);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(8px)}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r4);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.modal-hd{padding:22px 22px 18px;border-bottom:1px solid var(--b1);position:sticky;top:0;background:var(--bg2);z-index:10;display:flex;justify-content:space-between;align-items:flex-start}
+.modal-close{width:30px;height:30px;border-radius:7px;background:var(--bg3);border:1px solid var(--b1);color:var(--t2);cursor:pointer;display:grid;place-items:center;font-size:14px;flex-shrink:0;transition:all .15s}
+.modal-close:hover{border-color:var(--b2);color:var(--t1)}
+.modal-route{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--t2)}
+.modal-body{padding:22px}
+.score-section{display:flex;gap:16px;align-items:center;background:var(--card);border-radius:var(--r2);padding:18px;margin-bottom:18px}
+.score-ring-svg{flex-shrink:0}
+.score-num-big{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;fill:var(--cyan)}
+.score-breakdown{flex:1}
+.sbd-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sbd-label{font-size:11.5px;color:var(--t3);width:55px;flex-shrink:0;font-weight:600}
+.sbd-bar-wrap{flex:1;height:5px;background:var(--b1);border-radius:3px;overflow:hidden}
+.sbd-bar{height:100%;border-radius:3px;transition:width .6s ease}
+.sbd-val{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--t2);width:28px;text-align:right;flex-shrink:0}
+.sec-label{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.cmp-table{width:100%;border-collapse:collapse;margin-bottom:18px}
+.cmp-table th{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--b1);text-align:left}
+.cmp-table td{padding:12px;border-bottom:1px solid var(--b1);font-size:13px}
+.cmp-table tr:last-child td{border-bottom:none}
+.cmp-table tr.br td{background:rgba(0,229,160,.04)}
+.p-name{font-weight:700;color:var(--t1)}
+.p-price{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--orange)}
+.p-price.low{color:var(--green)}
+.btn-buy{padding:6px 14px;border-radius:7px;background:linear-gradient(135deg,var(--cyan),#0891b2);color:#07111f;font-weight:800;font-size:12px;border:none;cursor:pointer;transition:all .15s}
+.btn-buy:hover{opacity:.85}
+.hist-chart-wrap{background:var(--card);border-radius:var(--r2);padding:16px;margin-bottom:18px}
+.hist-chart-wrap h4{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:12px}
+.chart-svg-wrap{width:100%;overflow:hidden;border-radius:6px}
+.modal-footer{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-modal-o{padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;background:none;border:1px solid var(--b1);color:var(--t2);transition:all .2s;letter-spacing:.1px}
+.btn-modal-o:hover{border-color:var(--b2);color:var(--t1)}
+.btn-modal-p{padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--cyan),#0891b2);color:#07111f;border:none;transition:all .2s;letter-spacing:.1px;box-shadow:0 4px 14px rgba(18,216,250,.25)}
+.btn-modal-p:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(18,216,250,.35)}
+
+/* ─── NOTIF PANEL ────────────────── */
+.notif-panel{position:fixed;top:58px;right:12px;width:320px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r3);z-index:300;box-shadow:0 20px 60px rgba(0,0,0,.7);opacity:0;pointer-events:none;transform:translateY(-8px) scale(.98);transition:all .2s;overflow:hidden}
+.notif-panel.open{opacity:1;pointer-events:all;transform:none}
+.np-head{padding:14px 16px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center}
+.np-head strong{font-size:14px;font-weight:700}
+.np-mark{font-size:12px;color:var(--cyan);cursor:pointer;font-weight:600;opacity:.8}
+.np-mark:hover{opacity:1}
+.np-list{max-height:380px;overflow-y:auto}
+.ni{padding:13px 16px;border-bottom:1px solid var(--b1);display:flex;gap:10px;cursor:pointer;transition:background .15s;position:relative}
+.ni:last-child{border-bottom:none}
+.ni:hover{background:var(--bg3)}
+.ni.unread{border-left:2.5px solid var(--cyan)}
+.ni.unread.warn{border-left-color:var(--red)}
+.ni-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+.ni-g{background:var(--greenA)}.ni-r{background:var(--redA)}.ni-c{background:var(--cyanA)}
+.ni-body{flex:1;min-width:0}
+.ni-body strong{display:block;font-size:12.5px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ni-body span{font-size:11.5px;color:var(--t2);line-height:1.4}
+.ni-time{font-size:10.5px;color:var(--t3);flex-shrink:0;margin-top:1px}
+
+/* ─── TOAST ───────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--b2);border-radius:12px;padding:13px 18px;font-size:13.5px;font-weight:600;z-index:999;transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;color:var(--t1);box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;max-width:320px}
+.toast.show{transform:none;opacity:1}
+
+@media(max-width:680px){
+  .grid-flights,.alarm-grid{grid-template-columns:1fr}
+  .af-grid{grid-template-columns:1fr}
+  .hero h1{font-size:26px}
+  .hero-stats{gap:14px}
+  .hero-stat strong{font-size:18px}
+  .sb-row{flex-direction:column}.sb-sep{display:none}.btn-search{width:100%;margin-top:0}
+  .modal-footer{grid-template-columns:1fr}
+  .score-section{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-mark">✈</div>
+    <span class="logo-text">Flight<em>Snap</em></span>
+  </div>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="nav('home',this)">发现</button>
+    <button class="nav-tab" onclick="nav('search',this)">搜索</button>
+    <button class="nav-tab" onclick="nav('radar',this)">雷达</button>
+  </div>
+  <div class="nav-right">
+    <div class="icon-btn" onclick="toggleNotif()" id="notifBtn">🔔<span class="badge-count" id="notifBadge">3</span></div>
+  </div>
+</nav>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="np-head"><strong>消息通知</strong><span class="np-mark" onclick="markAllRead()">全部已读</span></div>
+  <div class="np-list" id="notifList"></div>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="home">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">实时监控 · 全网比价</div>
+      <h1>发现<span class="hl">特价</span>机票<br>比你更懂<span class="hl2">出行</span></h1>
+      <p class="hero-sub">聚合携程·去哪儿·飞猪·各航司，智能计算性价比评分，精准预警目标价格</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong id="statFlights">2,847</strong><span>今日特价</span></div>
+        <div class="hero-stat"><strong id="statRoutes">186</strong><span>监控路线</span></div>
+        <div class="hero-stat"><strong id="statSaving">-62%</strong><span>最高折扣</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <div class="sb-row">
+      <div class="sb-field"><span class="sb-label">出发城市</span><input class="sb-input" id="h-from" value="北京 BJS" placeholder="城市或机场代码"></div>
+      <div class="sb-sep">→</div>
+      <div class="sb-field"><span class="sb-label">目的地</span><input class="sb-input" id="h-to" placeholder="不填=任意目的地"></div>
+      <div class="sb-field"><span class="sb-label">出行日期</span><input class="sb-input" type="date" id="h-date" value="2026-05-01"></div>
+      <div class="sb-field"><span class="sb-label">舱位</span><select class="sb-input"><option>经济舱</option><option>商务舱</option><option>头等舱</option></select></div>
+      <button class="btn-search" onclick="goSearch()">搜 索 ✈</button>
+    </div>
+  </div>
+
+  <!-- countdown -->
+  <div class="deal-banner">
+    <div class="db-left">
+      <div class="db-icon">🔥</div>
+      <div class="db-text"><strong>限时特价闪购</strong><span>国庆五一特惠航班，抢完即止</span></div>
+    </div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+
+  <div class="tag-strip">
+    <span class="chip fire" data-filter="hot">🔥 今日特价</span>
+    <span class="chip on" data-filter="all">全部</span>
+    <span class="chip" data-filter="domestic">国内</span>
+    <span class="chip" data-filter="sea">东南亚</span>
+    <span class="chip" data-filter="japan">日韩</span>
+    <span class="chip" data-filter="europe">欧美</span>
+    <span class="chip" data-filter="direct">直飞</span>
+    <span class="chip" data-filter="luggage">含行李</span>
+  </div>
+
+  <div class="sh"><h2><span class="sh-icon" style="background:var(--cyanA)">📅</span>价格日历 · 北京→三亚</h2><a onclick="nav('search',document.querySelectorAll('.nav-tab')[1])">查看更多路线 →</a></div>
+  <div class="cal-wrap">
+    <div class="cal-hd">
+      <div class="cal-nav">
+        <div class="cal-arr" onclick="calMove(-1)">‹</div>
+        <span class="cal-title" id="calTitle">2026年5月</span>
+        <div class="cal-arr" onclick="calMove(1)">›</div>
+      </div>
+      <div class="cal-legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>历史最低</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>偏贵</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>节假高峰</div>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <div class="sh"><h2><span class="sh-icon" style="background:var(--orangeA)">🔥</span>特价 Feed</h2><a>全部 47 条 →</a></div>
+  <div class="grid-flights" id="homeFeed"></div>
+
+  <div class="sh"><h2><span class="sh-icon" style="background:var(--purpleA)">✨</span>灵感目的地</h2><a>更多 →</a></div>
+  <div class="inspo-row" id="inspoRow"></div>
+</div>
+
+<!-- SEARCH PAGE -->
+<div class="page" id="search">
+  <div style="margin-bottom:18px">
+    <h2 style="font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px">搜索结果</h2>
+    <p style="color:var(--t2);font-size:13.5px" id="searchDesc">北京 → 全部目的地 · 2026年5月1日 · 经济舱</p>
+  </div>
+  <div class="filter-bar">
+    <div class="f-chip on" data-flt="all" onclick="setFilter(this,'all')">全部</div>
+    <div class="f-chip" data-flt="direct" onclick="setFilter(this,'direct')">直飞</div>
+    <div class="f-chip" data-flt="1stop" onclick="setFilter(this,'1stop')">1次中转</div>
+    <div class="f-chip" data-flt="luggage" onclick="setFilter(this,'luggage')">含托运行李</div>
+    <div class="f-chip" data-flt="morning" onclick="setFilter(this,'morning')">上午出发</div>
+    <div class="f-chip" data-flt="refund" onclick="setFilter(this,'refund')">免费改签</div>
+    <div class="sort-group">
+      <button class="sort-btn on" onclick="setSort(this,'price')">价格↑</button>
+      <button class="sort-btn" onclick="setSort(this,'score')">评分</button>
+      <button class="sort-btn" onclick="setSort(this,'duration')">时长</button>
+    </div>
+  </div>
+  <div class="results-bar" id="resultsBar"></div>
+  <div class="grid-flights" id="searchGrid"></div>
+</div>
+
+<!-- RADAR PAGE -->
+<div class="page" id="radar">
+  <div class="radar-hero">
+    <div class="rh-row">
+      <div class="rh-left"><h2>🛰 价格雷达</h2><p>设定价格目标，系统24小时实时监控，达到目标立即推送</p></div>
+      <button class="btn-add" onclick="toggleForm()">＋ 新建预警</button>
+    </div>
+    <div class="rh-stats">
+      <div class="rh-stat"><strong id="statMon" style="color:var(--cyan)">3</strong><span>监控中</span></div>
+      <div class="rh-stat"><strong id="statTrig" style="color:var(--green)">1</strong><span>已触发</span></div>
+      <div class="rh-stat"><strong id="statExp" style="color:var(--t3)">1</strong><span>已过期</span></div>
+    </div>
+  </div>
+
+  <!-- add form -->
+  <div class="alarm-form" id="alarmForm">
+    <div class="af-title">＋ 新建价格预警</div>
+    <div class="af-grid">
+      <div class="af-field"><label class="af-label">出发城市</label><input class="af-input" id="af-from" placeholder="北京 / BJS" value="北京"></div>
+      <div class="af-field"><label class="af-label">目的地</label><input class="af-input" id="af-to" placeholder="留空=任意目的地"></div>
+      <div class="af-field full"><label class="af-label">日期模式</label>
+        <div class="mode-tabs">
+          <div class="mode-tab on" onclick="setMode(this,'exact')">📅 指定日期</div>
+          <div class="mode-tab" onclick="setMode(this,'flex')">🔀 弹性±3天</div>
+          <div class="mode-tab" onclick="setMode(this,'weekend')">🗓 任意周末</div>
+        </div>
+      </div>
+      <div class="af-field" id="af-date-wrap"><label class="af-label">出行日期</label><input class="af-input" type="date" id="af-date" value="2026-06-15"></div>
+      <div class="af-field"><label class="af-label">目标价格 (¥)</label>
+        <input class="af-input" type="number" id="af-price" placeholder="如：500" oninput="updateHint()">
+        <div class="af-hint" id="af-hint">输入目的地后系统将自动建议合理目标价</div>
+      </div>
+      <div class="af-field full"><label class="af-label">推送方式</label>
+        <div class="check-row">
+          <div class="check-pill on" onclick="this.classList.toggle('on')">📱 微信通知</div>
+          <div class="check-pill" onclick="this.classList.toggle('on')">📧 邮件推送</div>
+          <div class="check-pill on" onclick="this.classList.toggle('on')">🔔 App通知</div>
+        </div>
+      </div>
+      <div class="af-field"><label class="af-label">有效期</label>
+        <select class="af-input" id="af-expire"><option>7天</option><option selected>30天</option><option>90天</option></select>
+      </div>
+      <div class="af-field"><label class="af-label">乘客人数</label>
+        <select class="af-input"><option>1人</option><option>2人</option><option>3人</option><option>4人</option></select>
+      </div>
+    </div>
+    <div class="af-actions">
+      <button class="btn-cancel" onclick="toggleForm()">取消</button>
+      <button class="btn-add" onclick="createAlarm()">创建预警</button>
+    </div>
+  </div>
+
+  <div class="sh" style="margin-top:4px"><h2>我的预警</h2></div>
+  <div class="alarm-grid" id="alarmGrid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div><div class="modal-route" id="mRoute">北京 → 三亚</div><div class="modal-sub" id="mSub"></div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="score-section" id="mScore"></div>
+      <div class="sec-label">各平台报价对比</div>
+      <table class="cmp-table"><thead><tr><th>平台</th><th>价格</th><th>行李额</th><th>退改签</th><th>操作</th></tr></thead><tbody id="mTable"></tbody></table>
+      <div class="hist-chart-wrap">
+        <h4>近30天价格走势</h4>
+        <div class="chart-svg-wrap" id="mChart"></div>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green)"><svg width="18" height="1"><line x1="0" y1="0" x2="18" y2="0" stroke="var(--green)" stroke-dasharray="3,2" stroke-width="1.5"/></svg>历史最低</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--cyan)"><svg width="18" height="1"><line x1="0" y1="0" x2="18" y2="0" stroke="var(--cyan)" stroke-dasharray="3,2" stroke-width="1.5"/></svg>当前价格</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-o" onclick="fromModal()">🔔 设置价格预警</button>
+        <button class="btn-modal-p" id="mBuyBtn">立即购买最低价 ¥— →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════ DATA ════════ */
+const FLIGHTS = [
+  {id:1,from:'PEK',to:'SYX',fc:'北京',tc:'三亚',date:'05-01',dep:'08:30',arr:'11:00',dur:'2h30m',price:389,orig:980,disc:60,score:9.2,direct:true,cat:['domestic','direct','luggage'],perks:['20kg行李','机上餐食','免费改签'],trend:'down',hot:true,lim:true,platforms:[{n:'携程',p:389,lug:'20kg',ref:'宽松'},{n:'去哪儿',p:409,lug:'20kg',ref:'标准'},{n:'飞猪',p:424,lug:'15kg',ref:'有限制'}]},
+  {id:2,from:'SHA',to:'CTU',fc:'上海',tc:'成都',date:'05-03',dep:'13:20',arr:'16:10',dur:'2h50m',price:280,orig:680,disc:59,score:8.8,direct:true,cat:['domestic','direct','luggage','morning'],perks:['15kg行李','免费改签'],trend:'down',hot:false,lim:false,platforms:[{n:'去哪儿',p:280,lug:'15kg',ref:'标准'},{n:'携程',p:295,lug:'15kg',ref:'标准'},{n:'东航官网',p:288,lug:'20kg',ref:'宽松'}]},
+  {id:3,from:'PEK',to:'CAN',fc:'北京',tc:'广州',date:'05-05',dep:'15:00',arr:'18:10',dur:'3h10m',price:320,orig:760,disc:58,score:8.5,direct:true,cat:['domestic','direct'],perks:['20kg行李','机上餐食'],trend:'flat',hot:false,lim:false,platforms:[{n:'南航官网',p:320,lug:'23kg',ref:'宽松'},{n:'携程',p:335,lug:'20kg',ref:'标准'}]},
+  {id:4,from:'PEK',to:'TYO',fc:'北京',tc:'东京',date:'05-10',dep:'09:40',arr:'13:20',dur:'3h40m',price:1099,orig:3200,disc:66,score:9.5,direct:true,cat:['japan','direct','luggage'],perks:['23kg行李','机上娱乐','免费改签'],trend:'down',hot:true,lim:true,platforms:[{n:'国航官网',p:1099,lug:'23kg',ref:'宽松'},{n:'携程',p:1180,lug:'23kg',ref:'标准'},{n:'去哪儿',p:1159,lug:'20kg',ref:'标准'}]},
+  {id:5,from:'SHA',to:'BKK',fc:'上海',tc:'曼谷',date:'05-08',dep:'14:30',arr:'18:30',dur:'5h',price:680,orig:1880,disc:64,score:8.9,direct:false,cat:['sea','1stop','luggage'],perks:['20kg行李'],trend:'up',hot:true,lim:false,platforms:[{n:'飞猪',p:680,lug:'20kg',ref:'标准'},{n:'携程',p:720,lug:'20kg',ref:'标准'}]},
+  {id:6,from:'CAN',to:'SIN',fc:'广州',tc:'新加坡',date:'05-15',dep:'09:00',arr:'13:40',dur:'3h40m',price:780,orig:1960,disc:60,score:8.6,direct:true,cat:['sea','direct','luggage','morning'],perks:['25kg行李','机上餐食','免费改签'],trend:'flat',hot:false,lim:false,platforms:[{n:'南航官网',p:780,lug:'25kg',ref:'宽松'},{n:'携程',p:820,lug:'20kg',ref:'标准'}]},
+  {id:7,from:'PEK',to:'LHR',fc:'北京',tc:'伦敦',date:'05-20',dep:'11:00',arr:'16:30',dur:'10h30m',price:3800,orig:9500,disc:60,score:8.3,direct:false,cat:['europe','1stop'],perks:['23kg行李','商务舱升级'],trend:'down',hot:false,lim:false,platforms:[{n:'英国航空',p:3800,lug:'23kg',ref:'宽松'},{n:'携程',p:3950,lug:'20kg',ref:'标准'}]},
+  {id:8,from:'SHA',to:'ICN',fc:'上海',tc:'首尔',date:'05-12',dep:'10:20',arr:'13:40',dur:'2h',price:920,orig:2400,disc:62,score:9.0,direct:true,cat:['japan','direct','luggage','morning','refund'],perks:['20kg行李','免费改签'],trend:'down',hot:false,lim:true,platforms:[{n:'韩亚航空',p:920,lug:'23kg',ref:'宽松'},{n:'携程',p:980,lug:'20kg',ref:'标准'}]},
+];
+const INSPOS=[
+  {flag:'🇯🇵',name:'日本·东京',price:'¥1,099'},{flag:'🇹🇭',name:'泰国·曼谷',price:'¥680'},
+  {flag:'🇸🇬',name:'新加坡',price:'¥780'},{flag:'🌴',name:'三亚',price:'¥389'},
+  {flag:'🇰🇷',name:'韩国·首尔',price:'¥920'},{flag:'🇬🇧',name:'英国·伦敦',price:'¥3,800'},
+  {flag:'🇦🇺',name:'澳洲·悉尼',price:'¥2,400'},{flag:'🇫🇷',name:'法国·巴黎',price:'¥4,100'},
+];
+let ALARMS=[
+  {id:1,from:'北京',to:'三亚',date:'2026-05-01',dateMode:'exact',target:420,current:389,status:'triggered',expire:'2026-05-20',push:['微信','App']},
+  {id:2,from:'北京',to:'大阪',date:'2026-06-10',dateMode:'exact',target:900,current:1080,status:'monitoring',expire:'2026-06-01',push:['微信','App']},
+  {id:3,from:'上海',to:'马尔代夫',date:'弹性±3天',dateMode:'flex',target:2000,current:2380,status:'monitoring',expire:'2026-07-01',push:['微信']},
+  {id:4,from:'广州',to:'新加坡',date:'任意周末',dateMode:'weekend',target:700,current:820,status:'expired',expire:'2026-04-01',push:['邮件']},
+];
+const NOTIFS=[
+  {id:1,icon:'🎯',cls:'ni-r',type:'warn',title:'预警触发！北京→三亚',body:'已低于目标价¥420，当前最低¥389',time:'2分钟前',unread:true},
+  {id:2,icon:'📉',cls:'ni-c',type:'',title:'降价提醒：上海→成都',body:'价格降至¥280，较昨日降低¥60',time:'1小时前',unread:true},
+  {id:3,icon:'🔥',cls:'ni-r',type:'warn',title:'限时2小时！广州→东京',body:'特价¥1,099，仅剩12张',time:'3小时前',unread:true},
+  {id:4,icon:'✅',cls:'ni-g',type:'',title:'预警已创建成功',body:'北京→大阪 目标价¥900 开始监控',time:'昨天',unread:false},
+];
+let activeFilter='all', activeSort='price', calOffset=0, formOpen=false, notifOpen=false;
+const alarmNextId=()=>Math.max(...ALARMS.map(a=>a.id),0)+1;
+
+/* ════════ NAV ════════ */
+function nav(id,tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  tab && tab.classList.add('active');
+  closeNotif();
+}
+
+/* ════════ FLIGHT CARD ════════ */
+function mkCard(f,idx=0){
+  const best=f.platforms.reduce((a,b)=>a.p<b.p?a:b);
+  const pips=Array.from({length:10},(_,i)=>`<div class="pip${i<Math.round(f.score)?' on':''}"></div>`).join('');
+  const trendEl=f.trend==='down'?`<span class="fc-trend trend-d">↓近期下降</span>`:f.trend==='up'?`<span class="fc-trend trend-u">↑近期上涨</span>`:`<span class="fc-trend trend-f">→ 稳定</span>`;
+  const badgesEl=[
+    `<span class="badge b-disc">-${f.disc}%</span>`,
+    f.hot?`<span class="badge b-hot">🔥热门</span>`:'',
+    f.lim?`<span class="badge b-lim">⚡限时</span>`:'',
+  ].filter(Boolean).join('');
+  const perksEl=f.perks.map(p=>`<div class="perk">${p}</div>`).join('');
+  const platsEl=f.platforms.map(p=>`<div class="plat${p.n===best.n?' best':''}">${p.n===best.n?'★ ':''} ${p.n} ¥${p.p}</div>`).join('');
+  return `<div class="fc" onclick="openModal(${f.id})" style="animation-delay:${idx*.06}s">
+    <div class="fc-accent"></div>
+    <div class="fc-body">
+      <div class="fc-top">
+        <div class="fc-route">
+          <div class="fc-city"><div class="fc-code">${f.from}</div><div class="fc-name">${f.fc}</div></div>
+          <div class="fc-mid">
+            <div class="fc-line"><div class="fc-dash"></div><div class="fc-plane">✈</div><div class="fc-dash"></div></div>
+            <div class="fc-dur">${f.direct?'直飞':'中转'} · ${f.dur}</div>
+          </div>
+          <div class="fc-city"><div class="fc-code">${f.to}</div><div class="fc-name">${f.tc}</div></div>
+        </div>
+        <div class="fc-badges">${badgesEl}</div>
+      </div>
+      <div class="fc-price-row">
+        <div class="fc-price">¥${f.price.toLocaleString()}</div>
+        <div class="fc-price-sub"><span class="fc-orig">¥${f.orig.toLocaleString()}</span>${trendEl}</div>
+      </div>
+      <div class="fc-meta">
+        <div class="fc-meta-item">📅 ${f.date} ${f.dep}</div>
+        <div class="fc-meta-item">⏱ ${f.dur}</div>
+      </div>
+      <div class="fc-perks">${perksEl}</div>
+      <div class="fc-platforms">${platsEl}</div>
+    </div>
+    <div class="fc-footer">
+      <div class="fc-score"><span class="fc-score-num">${f.score}</span><div class="score-pips">${pips}</div></div>
+      <div class="fc-acts">
+        <button class="btn-xs btn-p" onclick="event.stopPropagation();openModal(${f.id})">详情</button>
+        <button class="btn-xs btn-g" onclick="event.stopPropagation();quickAlarm(${f.id})">预警</button>
+        <button class="btn-xs btn-g" onclick="event.stopPropagation();share(${f.id})">分享</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ════════ HOME FEED ════════ */
+function renderFeed(filter='all'){
+  let data=FLIGHTS.filter(f=>filter==='all'||f.cat.includes(filter)||filter==='hot'&&f.hot);
+  document.getElementById('homeFeed').innerHTML=data.slice(0,4).map((f,i)=>mkCard(f,i)).join('') || '<div class="empty-state"><h3>暂无特价航班</h3><p>试试其他分类筛选</p></div>';
+}
+document.querySelectorAll('.chip').forEach(c=>{
+  c.onclick=function(){
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+    renderFeed(this.dataset.filter);
+  };
+});
+
+/* ════════ INSPO ════════ */
+function renderInspo(){
+  document.getElementById('inspoRow').innerHTML=INSPOS.map(i=>`<div class="inspo-card"><div class="inspo-flag">${i.flag}</div><div class="inspo-name">${i.name}</div><div class="inspo-p">${i.price}起</div></div>`).join('');
+}
+
+/* ════════ CALENDAR ════════ */
+const calBase=[null,null,null,null,340,389,720,420,350,310,280,380,750,800,295,310,320,315,300,420,680,280,290,310,320,350,480,710,389,320,380];
+function renderCal(){
+  const d=new Date(2026,4+calOffset,1);
+  const yr=d.getFullYear(), mo=d.getMonth();
+  const mnths=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  document.getElementById('calTitle').textContent=`${yr}年${mnths[mo]}`;
+  const firstDow=(new Date(yr,mo,1).getDay()+6)%7;
+  const days=new Date(yr,mo+1,0).getDate();
+  const avg=360;
+  let h='';
+  ['一','二','三','四','五','六','日'].forEach(d=>h+=`<div class="cal-dow">${d}</div>`);
+  for(let i=0;i<firstDow;i++) h+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const p=calBase[d]||Math.round(290+Math.sin(d*.7)*80+Math.random()*70);
+    const r=p/avg;
+    const cls=r<.88?'d-lowest':r<.96?'d-low':r<1.14?'d-norm':r<1.3?'d-high':'d-peak';
+    const today=calOffset===0&&d===10;
+    const past=calOffset===0&&d<10;
+    h+=`<div class="cal-day ${cls} ${today?'today':''} ${past?'past':''}" onclick="${past?'':'calSelect(this,'+d+','+p+')'}">
+      <div class="d-num">${d}</div>
+      <div class="d-price">${past?'':'¥'+p}</div>
+    </div>`;
+  }
+  document.getElementById('calGrid').innerHTML=h;
+}
+function calMove(n){calOffset=Math.max(0,Math.min(2,calOffset+n));renderCal()}
+function calSelect(el,d,p){
+  document.querySelectorAll('.cal-day').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  toast(`📅 已选 5月${d}日 最低¥${p} — 为你搜索航班`);
+  setTimeout(()=>nav('search',document.querySelectorAll('.nav-tab')[1]),800);
+}
+
+/* ════════ SEARCH ════════ */
+function goSearch(){
+  const from=document.getElementById('h-from').value||'北京';
+  const to=document.getElementById('h-to').value||'全部目的地';
+  const date=document.getElementById('h-date').value||'2026-05-01';
+  document.getElementById('searchDesc').textContent=`${from} → ${to} · ${date} · 经济舱`;
+  nav('search',document.querySelectorAll('.nav-tab')[1]);
+  applySearch();
+}
+function applySearch(){
+  let data=[...FLIGHTS];
+  if(activeFilter==='direct') data=data.filter(f=>f.direct);
+  else if(activeFilter==='1stop') data=data.filter(f=>!f.direct);
+  else if(activeFilter==='luggage') data=data.filter(f=>f.cat.includes('luggage'));
+  else if(activeFilter==='morning') data=data.filter(f=>f.cat.includes('morning'));
+  else if(activeFilter==='refund') data=data.filter(f=>f.cat.includes('refund'));
+  if(activeSort==='price') data.sort((a,b)=>a.price-b.price);
+  else if(activeSort==='score') data.sort((a,b)=>b.score-a.score);
+  else if(activeSort==='duration') data.sort((a,b)=>parseFloat(a.dur)-parseFloat(b.dur));
+  const minP=data.length?Math.min(...data.map(f=>f.price)):0;
+  document.getElementById('resultsBar').innerHTML=`<span>共找到 <span class="r-hl">${data.length}</span> 个航班，最低价 <span class="r-hl-o">¥${minP.toLocaleString()}</span></span><span style="font-size:12px;color:var(--t3)">数据更新于 3分钟前</span>`;
+  document.getElementById('searchGrid').innerHTML=data.length?data.map((f,i)=>mkCard(f,i)).join(''):`<div class="empty-state"><h3>暂无符合条件的航班</h3><p>试试放宽筛选条件</p></div>`;
+}
+function setFilter(el,val){
+  document.querySelectorAll('.f-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  activeFilter=val;
+  applySearch();
+}
+function setSort(el,val){
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  activeSort=val;
+  applySearch();
+}
+
+/* ════════ MODAL ════════ */
+function openModal(id){
+  const f=FLIGHTS.find(x=>x.id===id);
+  if(!f) return;
+  const best=f.platforms.reduce((a,b)=>a.p<b.p?a:b);
+  document.getElementById('mRoute').textContent=`${f.fc} → ${f.tc}`;
+  document.getElementById('mSub').textContent=`2026-${f.date} ${f.dep} · ${f.direct?'直飞':'1次中转'} · ${f.dur} · ${f.from}→${f.to}`;
+  // Score ring SVG
+  const pct=f.score/10, r=32, c=40, circ=2*Math.PI*r;
+  const bd=[['价格',Math.round(f.score*10+2),'var(--cyan)'],['便利',Math.round(f.score*10-3),'var(--green)'],['时效',Math.round(f.score*10+5),'var(--orange)'],['准点',Math.round(f.score*10-1),'var(--purple)']];
+  document.getElementById('mScore').innerHTML=`
+    <svg class="score-ring-svg" width="80" height="80" viewBox="0 0 80 80">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--b1)" stroke-width="7"/>
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--cyan)" stroke-width="7" stroke-linecap="round"
+        stroke-dasharray="${circ*pct} ${circ*(1-pct)}" stroke-dashoffset="${circ*.25}" transform="rotate(-90 ${c} ${c})"/>
+      <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="central" class="score-num-big">${f.score}</text>
+    </svg>
+    <div class="score-breakdown">${bd.map(b=>`<div class="sbd-item"><span class="sbd-label">${b[0]}</span><div class="sbd-bar-wrap"><div class="sbd-bar" style="width:${b[1]}%;background:${b[2]}"></div></div><span class="sbd-val">${b[1]}</span></div>`).join('')}</div>`;
+  document.getElementById('mTable').innerHTML=f.platforms.map(p=>`<tr class="${p.n===best.n?'br':''}"><td><span class="p-name">${p.n===best.n?'★ ':' '}${p.n}</span></td><td><span class="p-price${p.n===best.n?' low':''} ">¥${p.p.toLocaleString()}</span></td><td style="color:var(--t2)">${p.lug}</td><td style="color:var(--t2)">${p.ref}</td><td><button class="btn-buy">购买</button></td></tr>`).join('');
+  // History chart SVG
+  const prices=Array.from({length:30},(_,i)=>Math.round(f.price*(0.85+Math.sin(i*.5)*0.15+Math.random()*.12)));
+  prices[29]=f.price;
+  const minP=Math.min(...prices), maxP=Math.max(...prices);
+  const W=580, H=90, pad=8;
+  const xs=prices.map((_,i)=>pad+i*(W-2*pad)/29);
+  const ys=prices.map(p=>H-pad-(p-minP)/(maxP-minP||1)*(H-2*pad));
+  const path='M'+xs.map((x,i)=>`${x.toFixed(1)},${ys[i].toFixed(1)}`).join('L');
+  const area=path+`L${xs[29].toFixed(1)},${H} L${xs[0].toFixed(1)},${H}Z`;
+  const lowY=(H-pad-(minP-minP)/(maxP-minP||1)*(H-2*pad)).toFixed(1);
+  const curY=ys[29].toFixed(1);
+  document.getElementById('mChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity=".25"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#g1)"/>
+    <path d="${path}" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round"/>
+    <line x1="${pad}" y1="${H}" x2="${W-pad}" y2="${H}" stroke="var(--b1)" stroke-width="1"/>
+    <line x1="${pad}" y1="${lowY}" x2="${W-pad}" y2="${lowY}" stroke="var(--green)" stroke-width="1" stroke-dasharray="4,3" opacity=".7"/>
+    <line x1="${pad}" y1="${curY}" x2="${W-pad}" y2="${curY}" stroke="var(--cyan)" stroke-width="1" stroke-dasharray="4,3" opacity=".6"/>
+    <circle cx="${xs[29].toFixed(1)}" cy="${curY}" r="4" fill="var(--cyan)"/>
+  </svg>`;
+  document.getElementById('mBuyBtn').textContent=`立即购买最低价 ¥${best.p.toLocaleString()} →`;
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('overlay')){
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+function fromModal(){
+  closeModal();
+  setTimeout(()=>{nav('radar',document.querySelectorAll('.nav-tab')[2]);toggleForm(true);},200);
+}
+
+/* ════════ ALARM ════════ */
+function renderAlarms(){
+  const mon=ALARMS.filter(a=>a.status==='monitoring').length;
+  const trig=ALARMS.filter(a=>a.status==='triggered').length;
+  const exp=ALARMS.filter(a=>a.status==='expired').length;
+  document.getElementById('statMon').textContent=mon;
+  document.getElementById('statTrig').textContent=trig;
+  document.getElementById('statExp').textContent=exp;
+  document.getElementById('alarmGrid').innerHTML=ALARMS.map(a=>{
+    const t=a.status==='triggered', m=a.status==='monitoring', e=a.status==='expired';
+    const pct=Math.min(100,Math.round((1-(a.current-a.target)/a.current)*100));
+    const statusEl=t?`<div class="ac-status s-trig"><div class="pulse-dot pulse-g"></div>已触发</div>`:m?`<div class="ac-status s-mon"><div class="pulse-dot pulse-c"></div>监控中</div>`:`<div class="ac-status s-exp">已过期</div>`;
+    const trigEl=t?`<div class="trigger-alert">🎉 已达到目标价！当前¥${a.current} &lt; 目标¥${a.target}</div>`:'';
+    const curColor=a.current<=a.target?'var(--green)':m?'var(--orange)':'var(--t3)';
+    const progressEl=m||t?`<div class="progress-wrap"><div class="progress-label"><span>价格接近度</span><span>${pct}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`:'';
+    return `<div class="ac ${t?'triggered':''} ${e?'expired':''}">
+      <button class="ac-del" onclick="delAlarm(${a.id})">✕</button>
+      ${statusEl}
+      <div class="ac-route">${a.from} → ${a.to}</div>
+      <div class="ac-rows">
+        <div class="ac-row"><span class="ac-label">出行日期</span><span class="ac-val">${a.date}</span></div>
+        <div class="ac-row"><span class="ac-label">有效期至</span><span class="ac-val">${a.expire}</span></div>
+        <div class="ac-row"><span class="ac-label">推送方式</span><span class="ac-val">${a.push.join(' / ')}</span></div>
+      </div>
+      ${trigEl}
+      <div class="ac-prices">
+        <div class="ac-price-item"><div class="ac-pi-label">目标价</div><div class="ac-pi-val" style="color:var(--orange)">¥${a.target}</div></div>
+        <div class="ac-price-item"><div class="ac-pi-label">当前最低</div><div class="ac-pi-val" style="color:${curColor}">¥${a.current}</div></div>
+      </div>
+      ${progressEl}
+      ${t?`<button class="btn-add" style="width:100%;padding:9px;margin-top:4px" onclick="openModal(1)">立即查看并购买 →</button>`:''}
+    </div>`;
+  }).join('');
+}
+function delAlarm(id){
+  ALARMS=ALARMS.filter(a=>a.id!==id);
+  renderAlarms();
+  toast('🗑 预警已删除');
+}
+function toggleForm(open){
+  const f=document.getElementById('alarmForm');
+  if(open===true||!formOpen){f.classList.add('open');formOpen=true;setTimeout(()=>f.scrollIntoView({behavior:'smooth',block:'nearest'}),50);}
+  else{f.classList.remove('open');formOpen=false;}
+}
+function setMode(el,mode){
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('af-date-wrap').style.display=mode==='exact'?'':'none';
+}
+function updateHint(){
+  const p=parseInt(document.getElementById('af-price').value)||0;
+  const to=document.getElementById('af-to').value||'目标路线';
+  const ref=Math.round(p*1.2);
+  const prob=p<300?'<20%':p<500?'约45%':p<700?'约72%':'很高';
+  document.getElementById('af-hint').innerHTML=`该路线当前参考价约 <strong>¥${ref}</strong>，你的目标¥${p||'—'} 触发概率 <strong>${prob}</strong>`;
+}
+function createAlarm(){
+  const from=document.getElementById('af-from').value.trim()||'北京';
+  const to=document.getElementById('af-to').value.trim()||'任意目的地';
+  const price=parseInt(document.getElementById('af-price').value)||500;
+  const mode=document.querySelector('.mode-tab.on').textContent.includes('指定')?'exact':document.querySelector('.mode-tab.on').textContent.includes('弹性')?'flex':'weekend';
+  const date=mode==='exact'?document.getElementById('af-date').value:mode==='flex'?'弹性±3天':'任意周末';
+  const expire=document.getElementById('af-expire').value;
+  const days=parseInt(expire)||30;
+  const expDate=new Date();expDate.setDate(expDate.getDate()+days);
+  const expStr=expDate.toISOString().slice(0,10);
+  const push=Array.from(document.querySelectorAll('.check-pill.on')).map(el=>el.textContent.trim().slice(1).trim());
+  ALARMS.unshift({id:alarmNextId(),from,to,date,dateMode:mode,target:price,current:price+Math.round(Math.random()*200+100),status:'monitoring',expire:expStr,push});
+  toggleForm();
+  renderAlarms();
+  toast(`✅ 价格预警已创建 — ${from}→${to} 目标¥${price}`);
+}
+function quickAlarm(id){
+  const f=FLIGHTS.find(x=>x.id===id);
+  nav('radar',document.querySelectorAll('.nav-tab')[2]);
+  setTimeout(()=>{
+    document.getElementById('af-from').value=f.fc;
+    document.getElementById('af-to').value=f.tc;
+    document.getElementById('af-price').value=Math.round(f.price*.9);
+    updateHint();
+    toggleForm(true);
+  },200);
+}
+
+/* ════════ NOTIFICATIONS ════════ */
+function renderNotifs(){
+  const unread=NOTIFS.filter(n=>n.unread).length;
+  const badge=document.getElementById('notifBadge');
+  badge.textContent=unread;
+  badge.style.display=unread?'grid':'none';
+  document.getElementById('notifList').innerHTML=NOTIFS.map(n=>`
+    <div class="ni ${n.unread?'unread':''} ${n.type==='warn'?'warn':''}" onclick="readNotif(${n.id})">
+      <div class="ni-icon ${n.cls}">${n.icon}</div>
+      <div class="ni-body"><strong>${n.title}</strong><span>${n.body}</span></div>
+      <div class="ni-time">${n.time}</div>
+    </div>`).join('');
+}
+function readNotif(id){NOTIFS.find(n=>n.id===id)&&(NOTIFS.find(n=>n.id===id).unread=false);renderNotifs()}
+function markAllRead(){NOTIFS.forEach(n=>n.unread=false);renderNotifs();closeNotif()}
+function toggleNotif(){notifOpen?closeNotif():openNotif()}
+function openNotif(){notifOpen=true;document.getElementById('notifPanel').classList.add('open')}
+function closeNotif(){notifOpen=false;document.getElementById('notifPanel').classList.remove('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('#notifBtn')&&!e.target.closest('.notif-panel'))closeNotif()});
+
+/* ════════ TOAST ════════ */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function share(id){
+  const f=FLIGHTS.find(x=>x.id===id);
+  toast(`📋 已复制分享链接 — ${f.fc}→${f.tc} ¥${f.price}`);
+}
+
+/* ════════ COUNTDOWN ════════ */
+function renderCountdown(){
+  const el=document.getElementById('countdown');
+  const end=new Date();end.setHours(23,59,59,999);
+  const diff=end-new Date();
+  const h=Math.floor(diff/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  el.innerHTML=`<div class="cd-box"><div class="cd-num">${String(h).padStart(2,'0')}</div><div class="cd-label">时</div></div><span class="cd-colon">:</span><div class="cd-box"><div class="cd-num">${String(m).padStart(2,'0')}</div><div class="cd-label">分</div></div><span class="cd-colon">:</span><div class="cd-box"><div class="cd-num">${String(s).padStart(2,'0')}</div><div class="cd-label">秒</div></div>`;
+}
+setInterval(renderCountdown,1000);
+
+/* ════════ ANIMATE STATS ════════ */
+function animStat(el,target,suffix=''){
+  let cur=0;const step=Math.ceil(target/40);
+  const iv=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur.toLocaleString()+suffix;if(cur>=target)clearInterval(iv)},30);
+}
+
+/* ════════ INIT ════════ */
+(function init(){
+  renderFeed('all');
+  renderInspo();
+  renderCal();
+  applySearch();
+  renderAlarms();
+  renderNotifs();
+  renderCountdown();
+  setTimeout(()=>{
+    animStat(document.getElementById('statFlights'),2847);
+    animStat(document.getElementById('statRoutes'),186);
+  },200);
+})();
+</script>
+</body>
+</html>
